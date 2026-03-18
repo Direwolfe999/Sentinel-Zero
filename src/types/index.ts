@@ -20,10 +20,25 @@ export interface PreprocessedInput {
 }
 
 export interface AnalysisResult {
+  // Core assessment
   risk: 'LOW' | 'MEDIUM' | 'HIGH';
+  riskScore: number; // 0-100
+  confidence: number; // 0-1
+  
+  // Explanation
   insight: string;
+  whyRisky: string; // NEW - explains the reasoning
+  patternsDetected: string[]; // NEW - e.g., ["Urgency tactics", "Unrealistic promises"]
+  
+  // Action
   recommendation: string;
-  confidence: number;
+  actionItems: {
+    do: string[];
+    dont: string[];
+  };
+  
+  // Metadata
+  mode: AnalysisMode;
   details?: Record<string, unknown>;
 }
 
