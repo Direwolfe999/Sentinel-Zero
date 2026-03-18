@@ -64,9 +64,19 @@ FOCUS ON: Communication flow, meeting efficiency, decision-making, team alignmen
 
 async function callOpenRouter(mode: AnalysisMode, content: string): Promise<AnalysisResult> {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) return getMockResponse(mode, content);
+
+  // Debug logging
+  console.log('[AI] Attempting OpenRouter API call');
+  console.log('[AI] API Key available:', !!apiKey);
+  console.log('[AI] API Key length:', apiKey?.length || 0);
+
+  if (!apiKey) {
+    console.log('[AI] No API key found, using mock response');
+    return getMockResponse(mode, content);
+  }
 
   try {
+    console.log('[AI] Calling OpenRouter API...');
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -84,9 +94,15 @@ async function callOpenRouter(mode: AnalysisMode, content: string): Promise<Anal
       }),
     });
 
-    if (!response.ok) return getMockResponse(mode, content);
+    console.log('[AI] OpenRouter response status:', response.status);
+
+    if (!response.ok) {
+      console.log('[AI] API error response, using mock');
+      return getMockResponse(mode, content);
+    }
 
     const data = await response.json();
+    console.log('[AI] API response received successfully');
     const text = data.choices[0].message.content;
 
     try {
@@ -103,9 +119,12 @@ async function callOpenRouter(mode: AnalysisMode, content: string): Promise<Anal
         mode,
       };
     } catch (parseError) {
+      console.log('[AI] JSON parse error, using mock');
       return getMockResponse(mode, content);
     }
   } catch (error) {
+    console.error('[AI] OpenRouter API error:', error instanceof Error ? error.message : String(error));
+    console.log('[AI] Falling back to mock response');
     return getMockResponse(mode, content);
   }
 }
